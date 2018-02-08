@@ -32,13 +32,25 @@ def output_shot(x, y):
         f_out.write('\n')
     pass
 
+def destroy_ship():
+    #Mendapat koordinat tembakan sebelumnya yang bernilai "HIT"
+    #Melakukan algoritma
+
+
+
 
 def fire_shot(opponent_map):
     # To send through a command please pass through the following <code>,<x>,<y>
     # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
     #  code 1 is your choice)
+    
+    
+    #sudah mendapat koordinat dari file eksternal
+    
+    
     targets = []
     for cell in opponent_map:
+        #Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
         if not cell['Damaged'] and not cell['Missed'] and ((cell['X'] % 2) == 0) and ((cell['Y'] % 2) == 0):
             valid_cell = cell['X'], cell['Y']
             targets.append(valid_cell)
@@ -76,3 +88,8 @@ if __name__ == '__main__':
     assert (os.path.isdir(args.WorkingDirectory))
     output_path = args.WorkingDirectory
     main(args.PlayerKey)
+
+    
+    
+    
+    
