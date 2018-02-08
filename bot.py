@@ -24,6 +24,9 @@ def main(player_key):
 
 def output_shot(x, y):
     move = 1  # 1=fire shot command code
+    f_shot = open("shots.txt", "a")
+    f_shot.write('{},{}\n'.format(x, y))
+    f_shot.close()
     with open(os.path.join(output_path, command_file), 'w') as f_out:
         f_out.write('{},{},{}'.format(move, x, y))
         f_out.write('\n')
@@ -48,7 +51,9 @@ def place_ships():
     # Please place your ships in the following format <Shipname> <x> <y> <direction>
     # Ship names: Battleship, Cruiser, Carrier, Destroyer, Submarine
     # Directions: north east south west
-
+    f_shot = open("shots.txt", "w")
+    f_shot.write('')
+    f_shot.close()
     ships = ['Battleship 1 0 north',
              'Carrier 3 1 East',
              'Cruiser 4 2 north',
