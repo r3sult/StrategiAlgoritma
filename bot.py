@@ -37,6 +37,19 @@ def destroy_ship():
     #Melakukan algoritma
 
 
+def convertshot(shotlist):
+    #Convert file eksternal menjadi list
+    with open("shots.txt", "r") as f:
+        #Inisiasi seluruh isi file ke shotlist masih berbentuk str dan memiliki koma
+        shotlist = f.readlines()
+    # Menghilangkan \n
+    shotlist = [x.strip() for x in shotlist]
+    i=0
+    for x in shotlist:
+        #Menjadikan isi shotlist menjadi list of list (['1', '2'], ['3', '5']]) etc
+        shotlist[i] = x.split(",")
+        i+=1
+    return
 
 
 def fire_shot(opponent_map):
@@ -49,6 +62,9 @@ def fire_shot(opponent_map):
     
     
     targets = []
+    shotlist = []
+    convertshot(shotlist)
+    #Mengakses x dan y terakhir dgn cara -> shotlist[-1] (Hasilnya akan [X, Y]
     for cell in opponent_map:
         #Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
         if not cell['Damaged'] and not cell['Missed'] and ((cell['X'] % 2) == 0) and ((cell['Y'] % 2) == 0):
@@ -72,7 +88,8 @@ def place_ships():
              'Destroyer 7 3 north',
              'Submarine 1 8 East'
              ]
-
+    with open("shots.txt", "w") as f_shot:
+        f_shot.close()
     with open(os.path.join(output_path, place_ship_file), 'w') as f_out:
         for ship in ships:
             f_out.write(ship)
