@@ -88,6 +88,7 @@ def place_ships():
              'Destroyer 7 3 north',
              'Submarine 1 8 East'
              ]
+    #Menghapus shots.txt yg awal
     with open("shots.txt", "w") as f_shot:
         f_shot.close()
     with open(os.path.join(output_path, place_ship_file), 'w') as f_out:
