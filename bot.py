@@ -35,6 +35,7 @@ def output_shot(x, y):
 def destroy_ship():
     #Mendapat koordinat tembakan sebelumnya yang bernilai "HIT"
     #Melakukan algoritma
+    
 
 
 def convertshot(shotlist):
@@ -65,13 +66,17 @@ def fire_shot(opponent_map):
     shotlist = []
     convertshot(shotlist)
     #Mengakses x dan y terakhir dgn cara -> shotlist[-1] (Hasilnya akan [X, Y]
-    for cell in opponent_map:
-        #Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
-        if not cell['Damaged'] and not cell['Missed'] and ((cell['X'] % 2) == 0) and ((cell['Y'] % 2) == 0):
-            valid_cell = cell['X'], cell['Y']
-            targets.append(valid_cell)
-    target = choice(targets)
-    output_shot(*target)
+    lastshot = shotlist[-1];
+    if (is_hit(lastshot)):
+    	destroy_ship()
+    else:
+	    for cell in opponent_map:
+	        #Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
+	        if not cell['Damaged'] and not cell['Missed'] and ((cell['X'] % 2) == 0) and ((cell['Y'] % 2) == 0):
+	            valid_cell = cell['X'], cell['Y']
+	            targets.append(valid_cell)
+	    target = choice(targets)
+	    output_shot(*target)
     return	
 
 
@@ -105,9 +110,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     assert (os.path.isdir(args.WorkingDirectory))
     output_path = args.WorkingDirectory
-    main(args.PlayerKey)
-
-    
-    
-    
-    
+main(args.PlayerKey)
