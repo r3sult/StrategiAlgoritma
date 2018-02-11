@@ -21,8 +21,6 @@ def main(player_key):
     else:
         fire_shot(state['OpponentMap']['Cells'])
 
-
-	
 def output_shot(x, y, move):
     # 1=fire shot command code
     f_shot = open("shots.txt", "a")
@@ -33,12 +31,9 @@ def output_shot(x, y, move):
         f_out.write('\n')
     pass
 
-
 def destroy_ship():
     #Mendapat koordinat tembakan sebelumnya yang bernilai "HIT"
     #Melakukan algoritma
-    
-
 
 def convertshot(shotlist):
     #Convert file eksternal menjadi list
@@ -47,13 +42,12 @@ def convertshot(shotlist):
         shotlist = f.readlines()
     # Menghilangkan \n
     shotlist = [x.strip() for x in shotlist]
-    i=0
+    i = 0
     for x in shotlist:
         #Menjadikan isi shotlist menjadi list of list (['1', '2'], ['3', '5']]) etc
         shotlist[i] = x.split(",")
         i+=1
     return
-
 
 def shield():
     if (map_size == 7):
@@ -79,9 +73,7 @@ def fire_shot(opponent_map):
     # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
     #  code 1 is your choice)
 
-
     #sudah mendapat koordinat dari file eksternal
-
 
     targets = []
     hit_list = []
@@ -122,7 +114,6 @@ def is_cross(x, y):
         point_south_east = (x+1, y-1)
         retrun (is_available(*point_south_west) and is_available(point_north_west) and is_available(point_north_east) and is_available(point_south_east))
 
-
 def place_ships():
     # Please place your ships in the following format <Shipname> <x> <y> <direction>
     # Ship names: Battleship, Cruiser, Carrier, Destroyer, Submarine
@@ -144,7 +135,6 @@ def place_ships():
             f_out.write(ship)
             f_out.write('\n')
     return
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
