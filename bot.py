@@ -22,8 +22,9 @@ def main(player_key):
         fire_shot(state['OpponentMap']['Cells'])
 
 
-def output_shot(x, y):
-    move = 1  # 1=fire shot command code
+	
+def output_shot(x, y, move):
+    # 1=fire shot command code
     f_shot = open("shots.txt", "a")
     f_shot.write('{},{}\n'.format(x, y))
     f_shot.close()
@@ -31,6 +32,7 @@ def output_shot(x, y):
         f_out.write('{},{},{}'.format(move, x, y))
         f_out.write('\n')
     pass
+
 
 def destroy_ship():
     #Mendapat koordinat tembakan sebelumnya yang bernilai "HIT"
