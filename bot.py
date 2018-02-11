@@ -82,17 +82,14 @@ def shield():
 
 def is_damaged(x, y):
     opponent_map = state['OpponentMap']['Cells']
-    if opponent_map[y*map_size + x]["Damaged"]:
-        return True
-    else:
-        return False
+    return (opponent_map[y*map_size + x]["Damaged"])
 
 def is_missed(x, y):
     opponent_map = state['OpponentMap']['Cells']
-    if opponent_map[y*map_size + x]["Missed"]:
-        return True
-    else:
-        return False
+    return opponent_map[y*map_size + x]["Missed"]
+
+def is_available(x, y):
+    return not is_damaged(x, y) and not is_missed(x, y)
 
 def fire_shot(opponent_map):
     # To send through a command please pass through the following <code>,<x>,<y>
@@ -115,15 +112,29 @@ def fire_shot(opponent_map):
 	    for cell in opponent_map:
 	        #Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
 	        if not cell['Damaged'] and not cell['Missed'] and ((cell['X'] % 2) == 0) and ((cell['Y'] % 2) == 0):
-	            valid_cell = cell['X'], cell['Y']
-	            targets.append(valid_cell)
+                valid_cell = cell['X'], cell['Y']
+                targets.append(valid_cell)
+                if(is_cross(cell['X'], cell['Y'])):
+                    valid_cross_cell = cell['X'], cell['Y']
+                    cross_shot_targets.append(valid_cross_cell)
 	    target = choice(targets)
         if (len(cross_shot_targets) >= 0 and ((map_size == 7 and energy >= 24) or (map_size == 10 and energy >= 36) or (map_size == 14 and energy >= 48))):
 
         output_shot(*target)
 return
 
-def isCross(x, y, opponent_map):
+def is_cross(x, y):
+    #mengecek apakah titik (x,y) sebagai titik tengah cross shot memenuhi sebagai kandidat cross shot
+    #ke 4 titik lainnya harus layak untuk ditembak
+    #kelayakan untuk ditembak adalah ketika tidak damaged dan tidak missed
+    
+    if(x >= 1 and x <= map_size-2 and y >= 1 and y <= map_size-2):
+    #tidak berada di pinggir map
+        point_south_west = (x-1, y-1)
+        point_north_west = (x-1, y+1)
+        point_north_east = (x+1, y+1)
+        point_south_east = (x+1, y-1)
+        retrun (is_available(*point_south_west) and is_available(point_north_west) and is_available(point_north_east) and is_available(point_south_east))
 
 
 def place_ships():
@@ -156,4 +167,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     assert (os.path.isdir(args.WorkingDirectory))
     output_path = args.WorkingDirectory
-main(args.PlayerKey)
+    main(args.PlayerKey)
