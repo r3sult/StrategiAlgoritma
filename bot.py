@@ -56,23 +56,6 @@ def convertshot(shotlist):
 
 
 def shield():
-    #   Each player is given a shield at the start of the game with 0 charges and a protection radius of 0.
-    #   The shield will only be usable at the start of phase 2.
-    #   After 7 rounds of not using the shield The shield will gain an additional charge.
-    #   For every charge the shield protection radius will grow by 1.
-    #   The shield will protect a square of cells, given the protection radius of the shield.
-    #   The shield has a max radius protection size, depending on the size of the map.
-    #       Small map will be a max radius of 1 unit: so a 3 x 3 block will be covered.
-    #       Medium Map will be a max radius of 2 units: so a 5 x 5 block will be covered.
-    #       Large Map will be a max radius of 3 units: so a 7 x 7 block will be covered.
-    #   The shield will prevent any shots from hitting the cell underneath the shield.
-    #   A shielded cell will only say it is shielded if it was hit.
-    #   Only one shield can be activated at a time.
-    #   Shields do not gain charge while they are active.
-    #   Shields lose 1 charge for each round they are active.
-    #   A shield must have at least 1 charge before it can be placed.
-    #   Shields block seeker missiles from finding targets underneath the shield.
-
     if (map_size == 7):
         output_shot(4,4,8)
     elif (map_size == 10):
@@ -101,13 +84,17 @@ def fire_shot(opponent_map):
 
 
     targets = []
+    hit_list = []
     cross_shot_targets = []
     shotlist = []
     convertshot(shotlist)
     #Mengakses x dan y terakhir dgn cara -> shotlist[-1] (Hasilnya akan [X, Y]
     lastshot = shotlist[-1];
     if (is_damaged(lastshot)):
-    	destroy_ship()
+        for cell in opponent_map:
+            if cell['Damaged']:
+                valid_cell = cell['X'], cell['Y']
+                hit_list.append(valid_cell)
     else:
 	    for cell in opponent_map:
 	        #Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
@@ -119,9 +106,8 @@ def fire_shot(opponent_map):
                     cross_shot_targets.append(valid_cross_cell)
 	    target = choice(targets)
         if (len(cross_shot_targets) >= 0 and ((map_size == 7 and energy >= 24) or (map_size == 10 and energy >= 36) or (map_size == 14 and energy >= 48))):
-
+            output_shot(*target,6)
         output_shot(*target)
-return
 
 def is_cross(x, y):
     #mengecek apakah titik (x,y) sebagai titik tengah cross shot memenuhi sebagai kandidat cross shot
