@@ -80,6 +80,20 @@ def shield():
     else:
         output_shot(7,7,8)
 
+def is_damaged(x, y):
+    opponent_map = state['OpponentMap']['Cells']
+    if opponent_map[y*map_size + x]["Damaged"]:
+        return True
+    else:
+        return False
+
+def is_missed(x, y):
+    opponent_map = state['OpponentMap']['Cells']
+    if opponent_map[y*map_size + x]["Missed"]:
+        return True
+    else:
+        return False
+
 def fire_shot(opponent_map):
     # To send through a command please pass through the following <code>,<x>,<y>
     # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
@@ -95,7 +109,7 @@ def fire_shot(opponent_map):
     convertshot(shotlist)
     #Mengakses x dan y terakhir dgn cara -> shotlist[-1] (Hasilnya akan [X, Y]
     lastshot = shotlist[-1];
-    if (is_hit(lastshot)):
+    if (is_damaged(lastshot)):
     	destroy_ship()
     else:
 	    for cell in opponent_map:
