@@ -72,11 +72,6 @@ def destroy_ship(hitlist):
     output_shot((*valid_target), 1)
 
 
-
-# Mendapat koordinat tembakan sebelumnya yang bernilai "HIT"
-# Melakukan algoritma
-
-
 def fire_shot(opponent_map):
     # To send through a command please pass through the following <code>,<x>,<y>
     # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
@@ -100,14 +95,7 @@ def fire_shot(opponent_map):
     if (len(hit_list)>0):
         destroy_ship(hit_list)
     else:
-        for cell in opponent_map:
-            # Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
-            if ((not cell['Damaged']) and (not cell['Missed']) and ((((cell['X'] % 2) == 0) and ((cell['Y'] % 2) == 0)) or (((cell['X'] % 2) == 1) and ((cell['Y'] % 2) == 1)))):
-                valid_cell = (cell['X'], cell['Y'])
-                targets.append(valid_cell)
-                if (is_cross(cell['X'], cell['Y'])):
-                    valid_cross_cell = (cell['X'], cell['Y'])
-                    cross_shot_targets.append(valid_cross_cell)
+        sort_list(targets, cross_shot_targets)
         target = choice(targets)
         energy = state['PlayerMap']['Owner']['Energy']
         if ((len(cross_shot_targets) >= 0) and ((map_size == 7 and energy >= 24) or (map_size == 10 and energy >= 36) or (map_size == 14 and energy >= 48))):
@@ -116,6 +104,18 @@ def fire_shot(opponent_map):
         else:
             output_shot((*target), 1)
     return
+
+def sort_list(targets, cross_shot_targets):
+    opponent_map = state['OpponentMap']['Cells']
+    for cell in opponent_map:
+        # Memilih cell yang tidak damaged, missed, dan grid yang X dan Y nya genap
+        if ((not cell['Damaged']) and (not cell['Missed']) and ((((cell['X'] % 2) == 0) and ((cell['Y'] % 2) == 0)) or (
+            ((cell['X'] % 2) == 1) and ((cell['Y'] % 2) == 1)))):
+            valid_cell = (cell['X'], cell['Y'])
+            targets.append(valid_cell)
+            if (is_cross(cell['X'], cell['Y'])):
+                valid_cross_cell = (cell['X'], cell['Y'])
+                cross_shot_targets.append(valid_cross_cell)
 
 def is_cross(x, y):
     # mengecek apakah titik (x,y) sebagai titik tengah cross shot memenuhi sebagai kandidat cross shot
