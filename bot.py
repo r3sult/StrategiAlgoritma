@@ -20,7 +20,11 @@ def main(player_key):
     if state['Phase'] == 1:
         place_ships()
     else:
-        fire_shot(state['OpponentMap']['Cells'])
+        x,y = check_state()
+        if (x==-1 and y==-1):
+            fire_shot(state['OpponentMap']['Cells'])
+        else:
+            output_shot(x, y, 8)
 
 
 def output_shot(x, y, move):
@@ -34,18 +38,42 @@ def output_shot(x, y, move):
         f_out.write('\n')
     pass
 
-def is_checked(x, y):
-    if ((is_damaged(x-1, y) or is_missed(x-1, y)) and (is_damaged(x+1, y) or is_missed(x+1, y)) and (is_damaged(x, y-1) or is_missed(x, y-1)) and (is_damaged(x, y+1) or is_missed(x, y+1))):
-        return True
+def ship_hitted():
+    player_ship = state['PlayerMap']['Owner']['Ships']
+    for i in range(5):
+        hit = False
+        shielded = False
+        if (not player_ship[i]['Destroyed']):
+            for cell in player_ship[i]['Cells']:
+                if (not cell['Shielded']):
+                    if (cell['Hit']):
+                        x = cell['X']
+                        y = cell['Y']
+                        hit = True
+                    if (cell['ShieldHit']):
+                        shielded = True
+                else:
+                    return -1,-1
+            if (hit and (not shielded)):
+                return x,y
+    return -1,-1
+
+def check_state():
+    player = state['PlayerMap']['Owner']
+    if (player['Shield']['CurrentRadius'] == player['Shield']['MaxRadius']):
+        x,y = ship_hitted()
+        return x,y
     else:
-        return False
+        return  -1,-1
+
+
 
 def is_damaged(x, y):
     opponent_map = state['OpponentMap']['Cells']
     if (x>=0) and (x<map_size) and (y>=0) and (y<map_size):
         return (opponent_map[x*map_size + y]['Damaged'])
     else:
-        return True
+        return False
 
 def is_missed(x, y):
     opponent_map = state['OpponentMap']['Cells']
@@ -58,29 +86,78 @@ def is_available(x, y):
     return ((not is_damaged(x, y)) and (not is_missed(x, y)))
 
 
-def destroy_ship(hitlist):
-    target = choice(hitlist)
-    valid_target = None
-    if is_available(target[0]-1, target[1]):
-        valid_target = target[0]-1, target[1]
-    elif is_available(target[0]+1, target[1]):
-        valid_target = target[0]+1, target[1]
-    elif is_available(target[0], target[1]-1):
-        valid_target = target[0], target[1]-1
-    elif is_available(target[0], target[1]+1):
-        valid_target = target[0], target[1]+1
-    output_shot((*valid_target), 1)
+def seek_ship(x, y, dirx, diry, num):
+    if (is_missed(x, y)):
+        seek_ship(x-dirx, y-diry, 0-dirx, 0-diry, num+1)
+    elif (is_damaged(x, y)):
+        seek_ship(x+dirx, y+diry, dirx, diry, num)
+    else:
+        output_shot(x, y, 1)
 
+
+def destroy_ship(x, y):
+    player_ship = state['PlayerMap']['Owner']['Ships']
+    player_energy = state['PlayerMap']['Owner']['Energy']
+    if (is_damaged_nearby(x, y)):
+        if (is_damaged(x, y+1) or is_damaged(x, y-1)):
+            seek_ship(x, y, 0, 1, 1)
+        else:
+            seek_ship(x, y, 1, 0, 1)
+    else:
+        if (is_available(x, y+1) and is_available(x, y-1) and (player_ship[1]['Weapons'][1]['EnergyRequired'] <= player_energy) and (not player_ship[1]['Destroyed'])):
+            output_shot(x, y, 2)
+        elif (is_available(x+1, y) and is_available(x-1, y) and (player_ship[1]['Weapons'][1]['EnergyRequired'] <= player_energy) and (not player_ship[1]['Destroyed'])):
+            output_shot(x, y, 3)
+        elif (is_available(x, y+1)):
+            output_shot(x, y+1, 1)
+        elif (is_available(x+1, y)):
+            output_shot(x+1, y, 1)
+        elif (is_available(x, y-1)):
+            output_shot(x, y-1, 1)
+        else:
+            output_shot(x-1, y, 1)
+    return
+
+
+
+def is_damaged_nearby(x, y):
+    return (is_damaged(x-1, y) or is_damaged(x+1,y) or is_damaged(x, y-1) or is_damaged(x, y+1))
+
+def check_hit_after(x, y, up, right):
+    if ((x>=0 and x<map_size) and (y>=0 and y<map_size)):
+        if (is_available(x, y)):
+            return True
+        elif (is_damaged(x, y)):
+            return (check_hit_after(x+up, y+right, up, right))
+        else:
+            return False
+    else:
+        return False
+
+def check_hit(x, y, up, right):
+    if ((up == 0) and (right ==0)):
+        if (is_damaged_nearby(x, y)):
+            if ((is_damaged(x+1, y) or is_damaged(x-1, y)) and (is_damaged(x, y+1), is_damaged(x, y-1))):
+                return (check_hit(x+1, y, 1, 0) and check_hit(x, y+1, 0, 1))
+            elif (is_damaged(x+1, y) or is_damaged(x-1, y)):
+                return (check_hit(x+1, y, 1, 0))
+            else:
+                return (check_hit(x, y+1, 0, 1))
+        else:
+            return True
+    else:
+        if (is_missed(x, y)):
+            return check_hit_after(x-up, y-right, 0-up, 0-right)
+        elif (is_damaged(x, y)):
+            return (check_hit(x + up, y + right, up, right))
+        else:
+            return True
 
 def fire_shot(opponent_map):
     # To send through a command please pass through the following <code>,<x>,<y>
     # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
     #  code 1 is your choice)
-
-
     # sudah mendapat koordinat dari file eksternal
-
-
     hit_list = []
     targets = []
     cross_shot_targets = []
@@ -89,16 +166,18 @@ def fire_shot(opponent_map):
     # Mengakses x dan y terakhir dgn cara -> shotlist[-1] (Hasilnya akan [X, Y]
     #lastshot = shotlist[-1];
     for cell in opponent_map:
-        if ((cell['Damaged']) and (not is_checked(cell['X'], cell['Y']))):
+        if (cell['Damaged']):
             valid = (cell['X'], cell['Y'])
-            hit_list.append(valid)
-    if (len(hit_list)>0):
-        destroy_ship(hit_list)
+            if (check_hit((*valid), 0, 0)):
+                destroy_ship(*valid)
+                return
+
     else:
         sort_list(targets, cross_shot_targets)
         target = choice(targets)
-        energy = state['PlayerMap']['Owner']['Energy']
-        if ((len(cross_shot_targets) >= 0) and ((map_size == 7 and energy >= 24) or (map_size == 10 and energy >= 36) or (map_size == 14 and energy >= 48))):
+        player_energy = state['PlayerMap']['Owner']['Energy']
+        player_ship = state['PlayerMap']['Owner']['Ships']
+        if ((len(cross_shot_targets) > 0) and (not player_ship[2]['Destroyed']) and (player_ship[2]['Weapons'][1]['EnergyRequired'] <= player_energy)):
             targetcross = choice(cross_shot_targets)
             output_shot((*targetcross), 5)
         else:
@@ -132,7 +211,6 @@ def is_cross(x, y):
     else:
         return False
 
-
 def place_ships():
     # Please place your ships in the following format <Shipname> <x> <y> <direction>
     # Ship names: Battleship, Cruiser, Carrier, Destroyer, Submarine
@@ -140,12 +218,27 @@ def place_ships():
     f_shot = open("shots.txt", "w")
     f_shot.write('')
     f_shot.close()
-    ships = ['Battleship 1 0 north',
-             'Carrier 3 1 East',
-             'Cruiser 4 2 north',
-             'Destroyer 7 3 north',
-             'Submarine 1 8 East'
-             ]
+    if (map_size == 10):
+        ships = ['Battleship 0 3 north',
+                 'Carrier 5 3 East',
+                 'Cruiser 1 0 north',
+                 'Destroyer 8 1 East',
+                 'Submarine 1 7 north'
+                 ]
+    elif (map_size == 7):
+        ships = ['Battleship 0 0 East',
+                 'Carrier 3 3 East',
+                 'Cruiser 6 4 north',
+                 'Destroyer 6 2 north',
+                 'Submarine 5 0 north'
+                 ]
+    else:
+        ships = ['Battleship 1 13 East',
+                 'Carrier 0 6 East',
+                 'Cruiser 11 2 East',
+                 'Destroyer 12 1 East',
+                 'Submarine 11 8 north'
+                 ]
     # Menghapus shots.txt yg awal
     with open("shots.txt", "w") as f_shot:
         f_shot.close()
@@ -154,7 +247,6 @@ def place_ships():
             f_out.write(ship)
             f_out.write('\n')
     return
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
